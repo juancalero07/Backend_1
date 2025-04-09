@@ -30,3 +30,21 @@ export const obtenerCliente = async (req, res) => {
     });
   }
 };
+
+export const registrarCliente = async (req, res) => {
+  try {
+    const { nombre, apellido, celular, direccion, cedula } = req.body;
+
+    const [result] = await pool.query(
+      'INSERT INTO Clientes (nombre, apellido, celular, direccion, cedula) VALUES (?, ?, ?, ?, ?)',
+      [nombre, apellido, celular, direccion, cedula]
+    );
+
+    res.status(201).json({ id_cliente: result.insertId });
+  } catch (error) {
+    return res.status(500).json({
+      mensaje: 'Ha ocurrido un error al registrar el cliente.',
+      error: error
+    });
+  }
+};
