@@ -31,6 +31,7 @@ export const obtenerCategoria = async (req, res) => {
   }
 };
 
+
 // Registrar una nueva categoría
 export const registrarCategoria = async (req, res) => {
   try {
@@ -69,6 +70,7 @@ export const eliminarCategoria = async (req, res) => {
     });
   }
 };
+
 // Actualizar una categoría por su ID (parcial o completa)
 export const actualizarCategoria = async (req, res) => {
   try {

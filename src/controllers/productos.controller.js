@@ -30,6 +30,7 @@ export const obtenerProducto = async (req, res) => {
     });
   }
 };
+
 // Registrar un nuevo producto
 export const registrarProducto = async (req, res) => {
   try {
@@ -69,6 +70,52 @@ export const registrarProducto = async (req, res) => {
     return res.status(500).json({
       mensaje: 'Ha ocurrido un error al registrar el producto.',
       error: error.message
+    });
+  }
+};
+
+// Eliminar un producto por su ID
+export const eliminarProducto = async (req, res) => {
+  try {
+    const [result] = await pool.query('DELETE FROM Productos WHERE id_producto = ?', [req.params.id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        mensaje: `Error al eliminar el producto. El ID ${req.params.id} no fue encontrado.`
+      });
+    }
+
+    res.status(204).send(); // Respuesta sin contenido para indicar éxito
+  } catch (error) {
+    return res.status(500).json({
+      mensaje: 'Ha ocurrido un error al eliminar el producto.',
+      error: error
+    });
+  }
+};
+
+// Actualizar un producto por su ID (parcial o completa)
+export const actualizarProducto = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const datos = req.body;
+
+    const [resultado] = await pool.query(
+      'UPDATE Productos SET ? WHERE id_producto = ?',
+      [datos, id]
+    );
+
+    if (resultado.affectedRows === 0) {
+      return res.status(404).json({
+        mensaje: `El producto con ID ${id} no existe.`,
+      });
+    }
+
+    res.status(204).send(); // Respuesta sin contenido para indicar éxito
+  } catch (error) {
+    return res.status(500).json({
+      mensaje: 'Error al actualizar el producto.',
+      error: error,
     });
   }
 };
