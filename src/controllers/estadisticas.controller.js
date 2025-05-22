@@ -44,10 +44,7 @@ export const totalVentasPorMes = async (req, res) => {
 
     const [result] = await pool2.query(query, queryParams);
 
-    res.status(200).json({
-      mensaje: result.length === 0 ? 'No se encontraron estadísticas de ventas por mes.' : 'Estadísticas de ventas por mes obtenidas correctamente.',
-      data: result,
-    });
+    res.status(200).json(result);
   } catch (error) {
     console.error('Error fetching monthly sales:', error);
     res.status(500).json({
@@ -82,22 +79,23 @@ export const totalVentasPorAnio = async (req, res) => {
 // 2.1 Total de ventas por empleado
 export const totalVentasPorEmpleado = async (req, res) => {
   try {
-    const [result] = await pool2.query(`
-      SELECT e.primer_nombre, e.segundo_nombre, e.primer_apellido, ROUND(SUM(hv.total_linea), 2) AS total_ventas
-      FROM Hecho_Ventas hv
-      JOIN Dim_Empleados e ON hv.id_empleado = e.id_empleado
-      GROUP BY e.id_empleado, e.primer_nombre, e.segundo_nombre, e.primer_apellido
-      ORDER BY total_ventas DESC
-    `);
-
-    res.status(200).json({
-      mensaje: result.length === 0 ? 'No se encontraron estadísticas de ventas por empleado.' : 'Estadísticas de ventas por empleado obtenidas correctamente.',
-      data: result,
-    });
+    const [result] = await pool2.query(
+      ` SELECT e.primer_nombre, e.segundo_nombre, e.primer_apellido, ROUND(SUM(hv.total_linea), 2) AS total_ventas
+        FROM Hecho_Ventas hv
+        JOIN Dim_Empleados e ON hv.id_empleado = e.id_empleado
+        GROUP BY e.id_empleado, e.primer_nombre, e.segundo_nombre, e.primer_apellido
+        ORDER BY total_ventas DESC; `
+    );
+    if (result.length === 0) {
+      return res.status(404).json({
+        mensaje: 'No se encontraron estadisticas de ventas.',
+      });
+    }
+    res.json(result);
   } catch (error) {
-    console.error('Error fetching sales by employee:', error);
-    res.status(500).json({
-      mensaje: 'Error al obtener las estadísticas de ventas por empleado.',
+    return res.status(500).json({
+      mensaje: 'Ha ocurrido un error al obtener las estadisticas de ventas.',
+      error: error.message,
     });
   }
 };
